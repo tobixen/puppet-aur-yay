@@ -14,13 +14,11 @@ Puppet::Type.type(:package).provide(:yay, parent: Puppet::Provider::Package) do
       include aur_yay
 
       package { 'immich-server':
-        ensure   => installed,
-        provider => yay,
+        ensure => installed,
       }
   "
 
   confine operatingsystem: :archlinux
-  defaultfor operatingsystem: :archlinux
 
   has_feature :installable
   has_feature :uninstallable

@@ -17,16 +17,18 @@
 # @example Basic usage
 #   include aur_yay
 #
-# @example Then use yay provider for packages
+# @example Then use yay provider for packages (provider is set automatically)
 #   package { 'immich-server':
-#     ensure   => installed,
-#     provider => yay,
+#     ensure => installed,
 #   }
 #
 class aur_yay (
   Enum['present'] $ensure     = 'present',
   String[1]       $build_user = '_yay',
 ) {
+  # Set yay as the default package provider for this scope
+  Package { provider => yay }
+
   # Create dedicated user for running yay/makepkg (cannot run as root)
   user { $build_user:
     ensure     => present,

@@ -27,6 +27,7 @@ include aur_yay
 This creates:
 - A `_yay` system user for running yay/makepkg (cannot run as root)
 - A sudoers file (`/etc/sudoers.d/yay-puppet`) granting the user access to pacman
+- Sets `yay` as the default package provider (no need to specify `provider => yay`)
 
 ### Installing yay
 
@@ -40,12 +41,17 @@ makepkg -si
 
 ## Usage
 
+First, include the class to set up the yay provider:
+
+```puppet
+include aur_yay
+```
+
 ### Basic package installation
 
 ```puppet
 package { 'google-chrome':
-  ensure   => installed,
-  provider => yay,
+  ensure => installed,
 }
 ```
 
@@ -53,8 +59,7 @@ package { 'google-chrome':
 
 ```puppet
 package { 'neovim':
-  ensure   => '0.9.5-1',
-  provider => yay,
+  ensure => '0.9.5-1',
 }
 ```
 
@@ -62,8 +67,7 @@ package { 'neovim':
 
 ```puppet
 package { 'immich-server':
-  ensure   => latest,
-  provider => yay,
+  ensure => latest,
 }
 ```
 
@@ -71,17 +75,8 @@ package { 'immich-server':
 
 ```puppet
 package { 'unwanted-package':
-  ensure   => absent,
-  provider => yay,
+  ensure => absent,
 }
-```
-
-### Include the class (optional)
-
-The class provides a warning if yay is not installed:
-
-```puppet
-include aur_yay
 ```
 
 ## Facts
