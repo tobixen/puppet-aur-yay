@@ -1,6 +1,6 @@
 {
   "name": "tobixen-aur_yay",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "tobixen",
   "summary": "Puppet package provider for Arch Linux AUR using yay",
   "license": "Apache-2.0",
