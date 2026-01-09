@@ -6,7 +6,13 @@ Puppet::Type.type(:package).provide(:yay, parent: Puppet::Provider::Package) do
     This provider allows installing packages from both the official
     Arch repositories and the AUR using yay.
 
+    Note: yay/makepkg cannot run as root, so this provider runs yay as
+    a dedicated '_yay' user. Include the aur_yay class to set up this
+    user and required sudoers configuration automatically.
+
     Example:
+      include aur_yay
+
       package { 'immich-server':
         ensure   => installed,
         provider => yay,
@@ -23,6 +29,23 @@ Puppet::Type.type(:package).provide(:yay, parent: Puppet::Provider::Package) do
 
   commands yay: 'yay'
   commands pacman: 'pacman'
+  commands sudo: 'sudo'
+
+  BUILD_USER = '_yay'.freeze
+
+  # Run yay as dedicated build user since makepkg cannot run as root
+  # The _yay user is created by the aur_yay class with home at /var/lib/yay
+  def self.run_yay_as_build_user(*args)
+    execute(
+      [command(:sudo), '-u', BUILD_USER, '-H', command(:yay)] + args,
+      failonfail: true,
+      combine: true
+    )
+  end
+
+  def run_yay_as_build_user(*args)
+    self.class.run_yay_as_build_user(*args)
+  end
 
   def self.instances
     packages = []
@@ -68,12 +91,12 @@ Puppet::Type.type(:package).provide(:yay, parent: Puppet::Provider::Package) do
       args << @resource[:name]
     end
 
-    yay(*args)
+    run_yay_as_build_user(*args)
   end
 
   def update
     # Upgrade to latest version
-    yay('--sync', '--noconfirm', @resource[:name])
+    run_yay_as_build_user('--sync', '--noconfirm', @resource[:name])
   end
 
   def uninstall
@@ -84,7 +107,7 @@ Puppet::Type.type(:package).provide(:yay, parent: Puppet::Provider::Package) do
   def latest
     # Query for latest available version
     begin
-      output = execute([command(:yay), '-Si', @resource[:name]], failonfail: false)
+      output = run_yay_as_build_user('-Si', @resource[:name])
       if output && (match = output.match(/^Version\s*:\s*(\S+)/))
         match[1]
       else

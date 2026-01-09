@@ -2,6 +2,10 @@
 
 Puppet package provider for Arch Linux AUR using yay.
 
+## Disclaimer
+
+Everything in this package, except for this disclaimer has been vibed up utilizing Claude Code.
+
 ## Description
 
 This module provides a `yay` package provider for Puppet, allowing you to manage packages from both the official Arch Linux repositories and the Arch User Repository (AUR).
@@ -12,15 +16,21 @@ This module provides a `yay` package provider for Puppet, allowing you to manage
 - yay must be installed on the system before using this provider
 - Puppet 7+ or OpenVox 7+
 
-### Installing yay
+## Setup
 
-yay is available in the official Arch repos:
+Include the `aur_yay` class to set up the required user and sudoers configuration:
 
-```bash
-pacman -S yay
+```puppet
+include aur_yay
 ```
 
-Or build from AUR manually (bootstrap):
+This creates:
+- A `_yay` system user for running yay/makepkg (cannot run as root)
+- A sudoers file (`/etc/sudoers.d/yay-puppet`) granting the user access to pacman
+
+### Installing yay
+
+Build from AUR manually (bootstrap):
 
 ```bash
 git clone https://aur.archlinux.org/yay.git
@@ -93,7 +103,7 @@ This module provides the following facts:
 ## Limitations
 
 - yay must be pre-installed (chicken-and-egg: can't use AUR provider to install AUR helper)
-- Runs as root, which yay normally warns against. The provider uses `--noconfirm` for non-interactive operation.
+- The `aur_yay` class must be included to set up the `_yay` build user before using the provider
 - Only tested on Arch Linux
 
 ## License
