@@ -1,0 +1,39 @@
+---
+name: Publish to Puppet Forge
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    name: Build and publish module
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      - name: Run tests before publishing
+        run: bundle exec rake spec
+
+      - name: Build module tarball
+        run: |
+          # Install PDK for building
+          wget -q https://apt.puppet.com/puppet-tools-release-jammy.deb
+          sudo dpkg -i puppet-tools-release-jammy.deb
+          sudo apt-get update -qq
+          sudo apt-get install -y pdk
+          pdk build --force
+
+      - name: Publish to Puppet Forge
+        uses: puppet/forge-module-release-action@v2
+        with:
+          forge_api_key: ${{ secrets.FORGE_API_KEY }}
