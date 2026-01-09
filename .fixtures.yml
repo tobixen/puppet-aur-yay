@@ -1,0 +1,7 @@
+fixtures:
+  forge_modules:
+    stdlib:
+      repo: puppetlabs/stdlib
+      ref: 9.0.0
+  symlinks:
+    aur_yay: "#{source_dir}"
